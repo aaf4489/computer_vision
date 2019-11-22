@@ -8,7 +8,7 @@ function main()
     file_names = dir('../TEST_IMAGES/*.jpg');
     %images = cell(3,66);
     cnt = 0;
-    for file_idx = 1 : length(file_names)
+    for file_idx = 1 : 21%length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -17,8 +17,6 @@ function main()
         filt_dy = filt_dx.';
         filt2_dx = fspecial('log');
         filt2_dy = filt2_dx.';
-        filt3_dx = fspecial('gaussian');
-        filt3_dy = filt3_dx.';
         
         % Apply the average filter to the horizontal and vertical
         % directions and then combine the results
@@ -41,13 +39,21 @@ function main()
             im_comb = im_canny;
         elseif(cnt == 3)
             
-            corners = detectHarrisFeatures(im_comb);
+            areas = regionprops(im_comb,'area');
+            idx = find([areas.Area] > 1000);
+            [parts, nparts] = bwlabel(im_comb);
+            for part_id = 0: nparts
+                part_map = parts == part_id;
+                for index = 0 : length(idx)
+                    if(part_id == index)
+                        figure
+                        imagesc(part_map);
+                    end
+                end
+            end
             
             figure
             imshow(im_comb)
-            
-            hold on;
-            plot(corners.selectStrongest(50));
   
             im_comb = im_canny;
             cnt = 0;
