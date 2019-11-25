@@ -31,7 +31,7 @@ function main()
         im_filt2 = im_filt_x2 + im_filt_y2;
         
         
-        im_canny = edge(im_filt2, 'canny', [0.05 0.3]);
+        im_canny = edge(im_filt2, 'canny', [0.05 0.15]);
         
         % Combine edges of the three images to reduce error and get more of
         % the edges that other images may miss. 
@@ -39,21 +39,19 @@ function main()
             im_comb = im_canny;
         elseif(cnt == 3)
             
-            areas = regionprops(im_comb,'area');
-            idx = find([areas.Area] > 1000);
-            [parts, nparts] = bwlabel(im_comb);
-            for part_id = 0: nparts
-                part_map = parts == part_id;
-                for index = 0 : length(idx)
-                    if(part_id == index)
-                        figure
-                        imagesc(part_map);
-                    end
-                end
-            end
+            dil_el = strel('square', 7);
+            erd_el = strel('square', 3);
             
+            im_dil = imdilate(im_comb, dil_el);
+            im_erd = imerode(im_dil, erd_el);
+            
+            [L, num] = bwlabel(im_erd, 8);
+            count_pixels_per_obj = sum(bsxfun(@eq,L(:),1:num));
+            [~,ind] = max(count_pixels_per_obj);
+            biggest_blob = (L==ind);
+
             figure
-            imshow(im_comb)
+            imshow(biggest_blob)
   
             im_comb = im_canny;
             cnt = 0;
