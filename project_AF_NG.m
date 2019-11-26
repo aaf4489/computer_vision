@@ -51,7 +51,13 @@ function main()
             biggest_blob = (L==ind);
 
             figure
-            imshow(biggest_blob)
+            filled_piece = imfill(biggest_blob, 'holes');
+            
+            C = corner(filled_piece, 'harris', 4);
+            imshow(filled_piece);
+            hold on
+            plot(C(:,1),C(:,2),'r*');
+            pause(1);
   
             im_comb = im_canny;
             cnt = 0;
@@ -60,5 +66,7 @@ function main()
         end
         
         cnt = cnt + 1;
+        
+        
     end
 end
