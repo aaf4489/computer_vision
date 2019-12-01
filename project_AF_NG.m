@@ -7,7 +7,7 @@ function main()
     % each file.
     file_names = dir('../TEST_IMAGES/*.jpg');
     cnt = 0;
-    for file_idx = 1 : 22%length(file_names)
+    for file_idx = 1 : length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -56,55 +56,58 @@ function main()
             % Fill in the puzzle piece and erode to remove excess noise and
             % return the piece back to about the original size 
             filled_piece = imfill(biggest_blob, 'holes');
-            
-            stats = regionprops(filled_piece, 'BoundingBox');
-            % Get Bounding box parameters
-            x_cord =  uint16(stats.BoundingBox(1));
-            y_cord =  uint16(stats.BoundingBox(2));
-            x_diff =  uint16(stats.BoundingBox(3));
-            y_diff =  uint16(stats.BoundingBox(4));
-            leftx_diff = uint16(floor(0.35*stats.BoundingBox(3)));
-            topy_diff = uint16(floor(0.35*stats.BoundingBox(4)));
-            rightx_diff = uint16(floor(0.35*stats.BoundingBox(3)));
-            bottomy_diff = uint16(floor(0.35*stats.BoundingBox(4)));
-            
+            if(file_idx == 19)
+                stats = regionprops(filled_piece, 'BoundingBox');
+            end
             filled_piece = imerode(filled_piece, strel('square', 7));
-            
             % Check if there is a piece in the image
+            
+            if(file_idx ~= 19 )
+                test_image = imerode(filled_piece, strel('disk', 10));
+                filled_piece = imdilate(test_image, strel('disk', 10));
+            end
             if(most > 120000 || most < 24326)
                 filled_piece(:) = 0;
             end
             
-            %C = corner(filled_piece, 'harris', 4);
+            % Get Bounding box parameters
+            %x_cord =  uint16(stats.BoundingBox(1));
+            %y_cord =  uint16(stats.BoundingBox(2));
+            %x_diff =  uint16(stats.BoundingBox(3));
+            %y_diff =  uint16(stats.BoundingBox(4));
+            %leftx_diff = uint16(floor(0.15*stats.BoundingBox(3)));
+            %topy_diff = uint16(floor(0.15*stats.BoundingBox(4)));
+            %rightx_diff = uint16(floor(0.15*stats.BoundingBox(3)));
+            %bottomy_diff = uint16(floor(0.15*stats.BoundingBox(4)));
+            
             figure
             imshow(filled_piece);
 
-            if(most <= 120000 && most >= 24326)
+            %if(most <= 120000 && most >= 24326)
                 % Draw the bounding box
-                hold on
-                   rectangle( 'Position', [x_cord, y_cord, leftx_diff, y_diff], 'EdgeColor', 'g');
-                   rectangle( 'Position', [x_cord, (y_cord+y_diff-bottomy_diff), x_diff, bottomy_diff], 'EdgeColor', 'r');
-                   rectangle( 'Position', [x_cord, y_cord, x_diff, topy_diff], 'EdgeColor', 'm');
-                   rectangle( 'Position', [(x_cord+x_diff-rightx_diff), y_cord, rightx_diff, y_diff], 'EdgeColor', 'c');
+            %    hold on
+            %       rectangle( 'Position', [x_cord, y_cord, leftx_diff, y_diff], 'EdgeColor', 'g');
+            %       rectangle( 'Position', [x_cord, (y_cord+y_diff-bottomy_diff), x_diff, bottomy_diff], 'EdgeColor', 'r');
+            %       rectangle( 'Position', [x_cord, y_cord, x_diff, topy_diff], 'EdgeColor', 'm');
+            %       rectangle( 'Position', [(x_cord+x_diff-rightx_diff), y_cord, rightx_diff, y_diff], 'EdgeColor', 'c');
+                   
                 
-                left_result = sum(sum(...
-                    filled_piece(y_cord:(y_cord + y_diff),...
-                    x_cord:(x_cord + leftx_diff))));
-                top_result = sum(sum(...
-                    filled_piece(y_cord:(y_cord + topy_diff),...
-                    x_cord:(x_cord + x_diff))));
-                right_result = sum(sum(...
-                    filled_piece(y_cord:(y_cord + y_diff),...
-                    (x_cord+x_diff-rightx_diff):(x_cord + x_diff))));
-                bottom_result = sum(sum(...
-                    filled_piece((y_cord+y_diff-bottomy_diff):(y_cord + y_diff),...
-                    x_cord:(x_cord+x_diff))));
+            %    left_result = sum(sum(...
+            %        filled_piece(y_cord:(y_cord + y_diff),...
+            %        x_cord:(x_cord + leftx_diff))));
+            %    top_result = sum(sum(...
+            %        filled_piece(y_cord:(y_cord + topy_diff),...
+            %        x_cord:(x_cord + x_diff))));
+            %    right_result = sum(sum(...
+            %        filled_piece(y_cord:(y_cord + y_diff),...
+            %        (x_cord+x_diff-rightx_diff):(x_cord + x_diff))));
+            %    bottom_result = sum(sum(...
+            %        filled_piece((y_cord+y_diff-bottomy_diff):(y_cord + y_diff),...
+            %        x_cord:(x_cord+x_diff))));
                 
-                fprintf("%d, %d, %d, %d \n", left_result, top_result,...
-                    right_result, bottom_result)
-            end
-            %hold on
-            %plot(C(:,1),C(:,2),'r*');
+            %    fprintf("%d, %d, %d, %d \n", left_result, top_result,...
+            %        right_result, bottom_result)
+            %end
             pause(1);
             
             % Conditions for pieces that overlapped to ignore one of the
