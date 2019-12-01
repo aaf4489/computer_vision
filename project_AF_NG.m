@@ -83,6 +83,19 @@ function main()
                 stats = regionprops(filled_piece, 'ConvexHull');
                 xs = sort(stats.ConvexHull(:,1));
                 ys = sort(stats.ConvexHull(:,2));
+            
+            %windowSize = 17; % 27 best? 21
+            %kernel = ones(windowSize) / windowSize ^ 2;
+            %blurryImage = conv2(single(filled_piece), kernel, 'same');
+            %filled_piece = blurryImage > 0.5;
+            
+            %pts = detectHarrisFeatures( filled_piece, 'MinQuality', .1, 'FilterSize', 29);
+            %imshow(filled_piece);
+            %hold on 
+            %strong_pts = selectStrongest(pts, 12);
+            %for pt_idx =1 : length(strong_pts) 
+            %    xy = strong_pts(pt_idx).Location;
+            %    plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
 
                 leftmost = floor(xs(1) + 55);
                 rightmost = floor(xs(end) - 55);
