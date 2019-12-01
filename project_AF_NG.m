@@ -7,7 +7,7 @@ function main()
     % each file.
     file_names = dir('../TEST_IMAGES/*.jpg');
     cnt = 0;
-    for file_idx = 1 : 21%length(file_names)
+    for file_idx = 1 : length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -71,47 +71,37 @@ function main()
                 filled_piece(:) = 0;
             end
             
-            
             figure 
-            pts = detectHarrisFeatures( filled_piece, 'MinQuality', .2, 'FilterSize', 29);
+            %pts = detectHarrisFeatures( filled_piece, 'MinQuality', .1, 'FilterSize', 31);
             imshow(filled_piece);
-            hold on 
-            strong_pts = selectStrongest(pts, 4);
-            for pt_idx =1 : length(strong_pts) 
-                xy = strong_pts(pt_idx).Location;
-                plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
+            hold on
+            if(most > 120000 || most < 24326)
+               title('No Piece') 
+            end 
+            if(most <= 120000 && most >= 24326)
+                
+                stats = regionprops(filled_piece, 'ConvexHull');
+                xs = sort(stats.ConvexHull(:,1));
+                ys = sort(stats.ConvexHull(:,2));
 
-               
+                leftmost = floor(xs(1) + 55);
+                rightmost = floor(xs(end) - 55);
+
+                topmost = floor(ys(1) + 55);
+                bottommost = floor(ys(end) - 55);
+
+                dims = size(filled_piece);
+                plot([leftmost leftmost], [1 dims(2)], 'r-')
+                plot([rightmost rightmost], [1 dims(2)], 'r-')
+                plot([1 dims(1)], [topmost topmost], 'r-')
+                plot([1 dims(1)], [bottommost bottommost], 'r-')
             end
-            
-            
-
-            %if(most <= 120000 && most >= 24326)
-                % Draw the bounding box
-            %    hold on
-            %       rectangle( 'Position', [x_cord, y_cord, leftx_diff, y_diff], 'EdgeColor', 'g');
-            %       rectangle( 'Position', [x_cord, (y_cord+y_diff-bottomy_diff), x_diff, bottomy_diff], 'EdgeColor', 'r');
-            %       rectangle( 'Position', [x_cord, y_cord, x_diff, topy_diff], 'EdgeColor', 'm');
-            %       rectangle( 'Position', [(x_cord+x_diff-rightx_diff), y_cord, rightx_diff, y_diff], 'EdgeColor', 'c');
-                   
-                
-            %    left_result = sum(sum(...
-            %        filled_piece(y_cord:(y_cord + y_diff),...
-            %        x_cord:(x_cord + leftx_diff))));
-            %    top_result = sum(sum(...
-            %        filled_piece(y_cord:(y_cord + topy_diff),...
-            %        x_cord:(x_cord + x_diff))));
-            %    right_result = sum(sum(...
-            %        filled_piece(y_cord:(y_cord + y_diff),...
-            %        (x_cord+x_diff-rightx_diff):(x_cord + x_diff))));
-            %    bottom_result = sum(sum(...
-            %        filled_piece((y_cord+y_diff-bottomy_diff):(y_cord + y_diff),...
-            %        x_cord:(x_cord+x_diff))));
-                
-            %    fprintf("%d, %d, %d, %d \n", left_result, top_result,...
-            %        right_result, bottom_result)
+            %strong_pts = selectStrongest(pts, 4);
+            %for pt_idx =1 : length(strong_pts) 
+            %    xy = strong_pts(pt_idx).Location;
+            %    plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
             %end
-            pause(1);
+            pause(2);
             
             % Conditions for pieces that overlapped to ignore one of the
             % images
@@ -130,9 +120,7 @@ function main()
                im_comb = im_comb + im_canny;
             end
         end
-        
         cnt = cnt + 1;
-        
-        
+                
     end
 end
