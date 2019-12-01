@@ -7,7 +7,7 @@ function main()
     % each file.
     file_names = dir('../TEST_IMAGES/*.jpg');
     cnt = 0;
-    for file_idx = 1 : length(file_names)
+    for file_idx = 1 : 21%length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -83,19 +83,6 @@ function main()
                 stats = regionprops(filled_piece, 'ConvexHull');
                 xs = sort(stats.ConvexHull(:,1));
                 ys = sort(stats.ConvexHull(:,2));
-            
-            %windowSize = 17; % 27 best? 21
-            %kernel = ones(windowSize) / windowSize ^ 2;
-            %blurryImage = conv2(single(filled_piece), kernel, 'same');
-            %filled_piece = blurryImage > 0.5;
-            
-            %pts = detectHarrisFeatures( filled_piece, 'MinQuality', .1, 'FilterSize', 29);
-            %imshow(filled_piece);
-            %hold on 
-            %strong_pts = selectStrongest(pts, 12);
-            %for pt_idx =1 : length(strong_pts) 
-            %    xy = strong_pts(pt_idx).Location;
-            %    plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
 
                 leftmost = floor(xs(1) + 55);
                 rightmost = floor(xs(end) - 55);
@@ -104,6 +91,36 @@ function main()
                 bottommost = floor(ys(end) - 55);
 
                 dims = size(filled_piece);
+                
+                left_edge = filled_piece(1:dims(2), leftmost);
+                right_edge = filled_piece(1:dims(2), rightmost);
+                top_edge = filled_piece(topmost, 1:dims(1));
+                bottom_edge = filled_piece(bottommost, 1:dims(1));
+                
+                edges = 0;
+                heads = 0;
+                holes = 0;
+                
+                [Left, numL] = bwlabel(left_edge);
+                [Right, numR] = bwlabel(right_edge);
+                [Top, numT] = bwlabel(top_edge);
+                [Bottom, numB] = bwlabel(bottom_edge);
+                
+                if(numL == 2)
+                    holes = holes + 1;
+                end
+                if(numR == 2)
+                    holes = holes + 1;
+                end
+                if(numT == 2)
+                    holes = holes + 1;
+                end
+                if(numB == 2)
+                    holes = holes + 1;
+                end
+                
+                title_string = string(holes);
+                title(title_string)
                 plot([leftmost leftmost], [1 dims(2)], 'r-')
                 plot([rightmost rightmost], [1 dims(2)], 'r-')
                 plot([1 dims(1)], [topmost topmost], 'r-')
