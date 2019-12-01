@@ -7,7 +7,7 @@ function main()
     % each file.
     file_names = dir('../TEST_IMAGES/*.jpg');
     cnt = 0;
-    for file_idx = 1 : 21%length(file_names)
+    for file_idx = 1 : length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -71,12 +71,17 @@ function main()
                 filled_piece(:) = 0;
             end
             
-            
             figure 
-            pts = detectHarrisFeatures( filled_piece, 'MinQuality', .2, 'FilterSize', 29);
+            
+            windowSize = 17; % 27 best? 21
+            kernel = ones(windowSize) / windowSize ^ 2;
+            blurryImage = conv2(single(filled_piece), kernel, 'same');
+            filled_piece = blurryImage > 0.5;
+            
+            pts = detectHarrisFeatures( filled_piece, 'MinQuality', .1, 'FilterSize', 29);
             imshow(filled_piece);
             hold on 
-            strong_pts = selectStrongest(pts, 4);
+            strong_pts = selectStrongest(pts, 12);
             for pt_idx =1 : length(strong_pts) 
                 xy = strong_pts(pt_idx).Location;
                 plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
