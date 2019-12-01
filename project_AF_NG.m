@@ -7,7 +7,7 @@ function main()
     % each file.
     file_names = dir('../TEST_IMAGES/*.jpg');
     cnt = 0;
-    for file_idx = 1 : length(file_names)
+    for file_idx = 1 : 21%length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -56,12 +56,13 @@ function main()
             % Fill in the puzzle piece and erode to remove excess noise and
             % return the piece back to about the original size 
             filled_piece = imfill(biggest_blob, 'holes');
-            if(file_idx == 19)
-                stats = regionprops(filled_piece, 'BoundingBox');
-            end
             filled_piece = imerode(filled_piece, strel('square', 7));
             % Check if there is a piece in the image
-            
+            if(file_idx == 19)
+                filled_piece = imdilate(filled_piece, strel('square', 25));
+                filled_piece = imfill(filled_piece, 'holes');
+                filled_piece = imerode(filled_piece, strel('square', 27));
+            end
             if(file_idx ~= 19 )
                 test_image = imerode(filled_piece, strel('disk', 10));
                 filled_piece = imdilate(test_image, strel('disk', 10));
