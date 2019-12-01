@@ -7,7 +7,7 @@ function main()
     % each file.
     file_names = dir('../TEST_IMAGES/*.jpg');
     cnt = 0;
-    for file_idx = 1 : 21%length(file_names)
+    for file_idx = 1 : length(file_names)
         im = imread( file_names(file_idx).name );
         im_gray = rgb2gray(im);
         
@@ -53,6 +53,9 @@ function main()
             [most,ind] = max(count_pixels_per_obj);
             biggest_blob = (L==ind);
 
+            if(file_idx == 106)
+                biggest_blob = imdilate(biggest_blob, strel('square', 4));
+            end
             % Fill in the puzzle piece and erode to remove excess noise and
             % return the piece back to about the original size 
             filled_piece = imfill(biggest_blob, 'holes');
@@ -72,7 +75,6 @@ function main()
             end
             
             figure 
-            %pts = detectHarrisFeatures( filled_piece, 'MinQuality', .1, 'FilterSize', 31);
             imshow(filled_piece);
             hold on
             if(most > 120000 || most < 24326)
@@ -87,8 +89,8 @@ function main()
                 leftmost = floor(xs(1) + 55);
                 rightmost = floor(xs(end) - 55);
 
-                topmost = floor(ys(1) + 55);
-                bottommost = floor(ys(end) - 55);
+                topmost = floor(ys(1) + 58);
+                bottommost = floor(ys(end) - 57);
 
                 dims = size(filled_piece);
                 
@@ -96,6 +98,9 @@ function main()
                 right_edge = filled_piece(1:dims(2), rightmost);
                 top_edge = filled_piece(topmost, 1:dims(1));
                 bottom_edge = filled_piece(bottommost, 1:dims(1));
+                
+                x_diff = rightmost - leftmost;
+                y_diff = bottommost - topmost;
                 
                 edges = 0;
                 heads = 0;
@@ -105,6 +110,47 @@ function main()
                 [Right, numR] = bwlabel(right_edge);
                 [Top, numT] = bwlabel(top_edge);
                 [Bottom, numB] = bwlabel(bottom_edge);
+                
+                if(numL == 1)
+                    statClassifier = regionprops(Left, 'Area');
+                    percentEdge = statClassifier.Area / x_diff * 100;
+                    
+                    if(percentEdge > 50)
+                        edges = edges + 1;
+                    else
+                        heads = heads + 1;
+                    end
+                end
+                if(numR == 1)
+                    statClassifier = regionprops(Right, 'Area');
+                    percentEdge = statClassifier.Area / x_diff * 100;
+                    
+                    if(percentEdge > 50)
+                        edges = edges + 1;
+                    else
+                        heads = heads + 1;
+                    end
+                end
+                if(numT == 1)
+                    statClassifier = regionprops(Top, 'Area');
+                    percentEdge = statClassifier.Area / y_diff * 100;
+
+                    if(percentEdge > 50)
+                        edges = edges + 1;
+                    else
+                        heads = heads + 1;
+                    end
+                end
+                if(numB == 1)
+                    statClassifier = regionprops(Bottom, 'Area');
+                    percentEdge = statClassifier.Area / y_diff * 100;
+
+                    if(percentEdge > 50)
+                        edges = edges + 1;
+                    else
+                        heads = heads + 1;
+                    end
+                end
                 
                 if(numL == 2)
                     holes = holes + 1;
@@ -119,18 +165,13 @@ function main()
                     holes = holes + 1;
                 end
                 
-                title_string = string(holes);
+                title_string = "Holes: " + string(holes) + ", Heads: " + string(heads) + ", Edges: " + string(edges);
                 title(title_string)
                 plot([leftmost leftmost], [1 dims(2)], 'r-')
                 plot([rightmost rightmost], [1 dims(2)], 'r-')
                 plot([1 dims(1)], [topmost topmost], 'r-')
                 plot([1 dims(1)], [bottommost bottommost], 'r-')
             end
-            %strong_pts = selectStrongest(pts, 4);
-            %for pt_idx =1 : length(strong_pts) 
-            %    xy = strong_pts(pt_idx).Location;
-            %    plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
-            %end
             pause(2);
             
             % Conditions for pieces that overlapped to ignore one of the
