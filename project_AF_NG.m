@@ -71,18 +71,20 @@ function main()
                 filled_piece(:) = 0;
             end
             
-            % Get Bounding box parameters
-            %x_cord =  uint16(stats.BoundingBox(1));
-            %y_cord =  uint16(stats.BoundingBox(2));
-            %x_diff =  uint16(stats.BoundingBox(3));
-            %y_diff =  uint16(stats.BoundingBox(4));
-            %leftx_diff = uint16(floor(0.15*stats.BoundingBox(3)));
-            %topy_diff = uint16(floor(0.15*stats.BoundingBox(4)));
-            %rightx_diff = uint16(floor(0.15*stats.BoundingBox(3)));
-            %bottomy_diff = uint16(floor(0.15*stats.BoundingBox(4)));
             
-            figure
+            figure 
+            pts = detectHarrisFeatures( filled_piece, 'MinQuality', .2, 'FilterSize', 29);
             imshow(filled_piece);
+            hold on 
+            strong_pts = selectStrongest(pts, 4);
+            for pt_idx =1 : length(strong_pts) 
+                xy = strong_pts(pt_idx).Location;
+                plot(xy(1), xy(2), 'rs', 'MarkerSize', 16, 'LineWidth', 2);
+
+               
+            end
+            
+            
 
             %if(most <= 120000 && most >= 24326)
                 % Draw the bounding box
