@@ -174,6 +174,7 @@ function main()
                 edges = 0;
                 heads = 0;
                 holes = 0;
+                results = [0 0 0 0];
                 
                 % Get the regions and number of regions along the
                 % classifying lines
@@ -193,6 +194,7 @@ function main()
                         edges = edges + 1;
                     else
                         heads = heads + 1;
+                        results(1) = 1;
                     end
                 end
                 % If the right edge is one region, get the area of that
@@ -206,6 +208,7 @@ function main()
                         edges = edges + 1;
                     else
                         heads = heads + 1;
+                        results(3) = 1;
                     end
                 end
                 % If the top edge is one region, get the area of that
@@ -219,6 +222,7 @@ function main()
                         edges = edges + 1;
                     else
                         heads = heads + 1;
+                        results(2) = 1;
                     end
                 end
                 % If the bottom edge is one region, get the area of that
@@ -232,30 +236,75 @@ function main()
                         edges = edges + 1;
                     else
                         heads = heads + 1;
+                        results(4) = 1;
                     end
                 end
                 
                 % If the left edge is two regions, classify it as a hole
                 if(numL == 2)
                     holes = holes + 1;
+                    results(1) = 2;
                 end
                 % If the right edge is two regions, classify it as a hole
                 if(numR == 2)
                     holes = holes + 1;
+                    results(3) = 2;
                 end
                 % If the top edge is two regions, classify it as a hole
                 if(numT == 2)
                     holes = holes + 1;
+                    results(2) = 2;
                 end
                 % If the bottom edge is two regions, classify it as a hole
                 if(numB == 2)
                     holes = holes + 1;
+                    results(4) = 2;
                 end
                 
-                % Define the title of the classified image
-                title_string = "Holes: " + string(holes) + ", Heads: " +...
-                    string(heads) + ", Edges: " + string(edges);
-                title(title_string)
+                if(heads == 2)
+                    if((results(1) == results(2) && results(1) == 1) ||...
+                            (results(1) == results(4) && results(1) == 1))
+                            % Define the title of the classified image
+                            title_string = "Holes: " + string(holes) + ", Heads: " +...
+                            string(heads) + " (Adjacent), Edges: " + string(edges);
+                            title(title_string)
+                    elseif((results(2) == results(3) && results(3) == 1) ||...
+                            (results(3) == results(4) && results(3) == 1))
+                            % Define the title of the classified image
+                            title_string = "Holes: " + string(holes) + ", Heads: " +...
+                            string(heads) + " (Adjacent), Edges: " + string(edges);
+                            title(title_string)
+                    else
+                        % Define the title of the classified image
+                        title_string = "Holes: " + string(holes) + ", Heads: " +...
+                        string(heads) + " (Opposite), Edges: " + string(edges);
+                        title(title_string)
+                    end
+                elseif(holes == 2 && heads ~= 2)
+                    if((results(1) == results(2) && results(1) == 2) ||...
+                            (results(1) == results(4) && results(1) == 2))
+                            % Define the title of the classified image
+                            title_string = "Holes: " + string(holes) + " (Adjacent), Heads: " +...
+                            string(heads) + ", Edges: " + string(edges);
+                            title(title_string)
+                    elseif((results(2) == results(3) && results(3) == 2) ||...
+                            (results(3) == results(4) && results(3) == 2))
+                            % Define the title of the classified image
+                            title_string = "Holes: " + string(holes) + " (Adjacent), Heads: " +...
+                            string(heads) + ", Edges: " + string(edges);
+                            title(title_string)
+                    else
+                        % Define the title of the classified image
+                        title_string = "Holes: " + string(holes) + " (Opposite), Heads: " +...
+                        string(heads) + ", Edges: " + string(edges);
+                        title(title_string)
+                    end
+                else
+                    % Define the title of the classified image
+                    title_string = "Holes: " + string(holes) + ", Heads: " +...
+                        string(heads) + ", Edges: " + string(edges);
+                    title(title_string)
+                end
                 % Display the classifying lines on the classification image
                 plot([leftmost leftmost], [1 dims(2)], 'r-')
                 plot([rightmost rightmost], [1 dims(2)], 'r-')
